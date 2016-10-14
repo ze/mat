@@ -1,10 +1,10 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall 
 
-MAIN=matrix_solve.c
+SRC = matrix.c determinant.c
 
 all: $(SRC)
-	$(CC) $(CFLAGS) $(MAIN) -o matrix
+	$(CC) $(CFLAGS) $(SRC) -o matrix
 
 clean:
 	@rm matrix
