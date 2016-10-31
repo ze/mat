@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall 
 
-SRC = matrix.c determinant.c
+SRC = main.c matrix.c
 
 all: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o matrix

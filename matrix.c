@@ -1,65 +1,16 @@
-#include <ctype.h>
-#include <string.h>
-
 #include "matrix.h"
 
-void input_check(char *input);
-matrix set_data(char *mat);
-double **parse_input(char *mat, double **data);
+double determinant(matrix m);
+matrix adjugate(matrix m);
+matrix transpose(matrix m);
 
-int main(int argc, char **argv) {
-    if (argc == 1) USAGE("missing input field");
-    char *mat = argv[1];
-
-    input_check(mat);
-    if (argc == 2) {
-        matrix m = set_data(mat);
-        double det = determinant(m);
-        printf("determinant: %.2f\n", det);
-        free_data(m);
+double **set_data(int rows, int cols) {
+    double **data = malloc(sizeof(double *) * rows);
+    for (int i = 0; i < rows; i++) {
+        *(data + i) = malloc(sizeof(double) * cols);
     }
-    return 0;
-}
-
-void input_check(char *input) {
-    if (!strpbrk(input, "[]") || *input != '[') USAGE("invalid input");
-    int depth = 0;
-
-    // Input correctness check
-    for (; *input; input++) {
-        if (*input == '[') depth++;
-        if (*input == ']') depth--;
-        if (isalpha(*input) || (!isdigit(*input) && *(input + 1) == ']')) {
-            USAGE("invalid input");
-        }
-        if (*(input + 1) == '[' && isdigit(*input)) USAGE("invalid input");
-        if (*input == '[' && *(input + 1) == ']') USAGE("empty matrix inputted");
-    }
-    if (*(input - 1) != ']') USAGE("invalid input");
-
-    if (depth != 0) USAGE("inequal brackets");
-} 
-
-matrix set_data(char *mat) {
-    char *temp = mat;
-    matrix m;
-    m.rows = m.cols = 0;
-
-    // Get rows and columns from input
-    for (; *temp; temp++) {
-        if (*temp == '[') m.rows++;	
-        if (*temp == ',') m.cols++;	
-    }
-    if (m.rows == 0) m.rows++;
-    m.cols = (m.cols + m.rows) / m.rows;
-
-    m.data = malloc(sizeof(double *) * m.rows);	
-    for (int i = 0; i < m.rows; i++) {
-        *(m.data + i) = malloc(sizeof(double) * m.cols);
-    }
-
-    m.data = parse_input(mat, m.data);
-    return m;
+    
+    return data;
 }
 
 void free_data(matrix m) {
@@ -70,25 +21,124 @@ void free_data(matrix m) {
     free(m.data);
 }
 
-double **parse_input(char *mat, double **data) {
-    int depth = -1;
-    char *delimit = mat;
-    double n;
-
-    // Place contents of mat into data
-    while (*delimit) {
-        for (int i = 0; *delimit != ']'; i++) {
-            n = strtod(mat, &delimit);
-            if (*delimit == '[') {
-                delimit++;
-                depth++;
-            }
-            if (*delimit == ',') delimit++;
-            (*mat != '[') ? *(*(data + depth) + i) = n : i--;
-            mat = delimit;
-        }
-        mat = ++delimit;
+double determinant(matrix m) {
+    if (m.rows != m.cols) USAGE("input not NxN"); 
+    if (m.rows == 1 && m.cols == 1) return m.data[0][0];
+    if (m.rows == 2 && m.cols == 2) {
+       return (m.data[0][0] * m.data[1][1]) - (m.data[0][1] * m.data[1][0]);
     }
 
-    return data;
+    double det = 0;
+    static int sign = 1;
+    
+    // creation of submatrix
+    matrix sub;
+    sub.rows = sub.cols = m.rows - 1;
+    sub.data = set_data(sub.rows, sub.cols);
+
+    /* 
+     * construct new array from m.data.
+     * exclude current row and column and fill leftovers.
+     */
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 1; j < m.rows; j++) {
+            for (int k = 0, l = 0; k < m.rows; k++) {
+                if (k == i) continue;
+                sub.data[j - 1][l] = m.data[j][k];
+                l++;
+            }
+        }
+        det += sign * m.data[0][i] * determinant(sub);
+        sign *= -1;
+    }
+
+    free_data(sub);
+    return det;
+}
+
+matrix adjugate(matrix m) {
+    matrix *sub = malloc(sizeof(matrix) * m.rows * m.cols);
+    for (int i = 0; i < m.rows * m.cols; i++) {
+        sub[i].rows = m.rows - 1;
+        sub[i].cols = m.cols - 1;
+        sub[i].data = set_data(sub->rows, sub->cols);
+    }
+    int sign = 1;
+
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            for (int k = 0, x = 0; k < m.rows; k++) {
+                if (k == i) {
+                    x++;
+                    continue;
+                }
+                for (int l = 0, y = 0; l < m.cols; l++) {
+                    if (l == j)  {
+                        y++;
+                        continue;
+                    }
+                    sub[i * m.rows + j].data[k - x][l - y] = m.data[k][l];
+                }
+            }
+        }
+    }
+
+    matrix adj = {m.rows, m.cols, set_data(m.rows, m.cols)};
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            adj.data[i][j] = sign * determinant(sub[i * m.rows + j]);
+            sign *= -1;
+        }
+    }
+    
+    for (int i = 0; i < m.rows * m.cols; i++) {
+        free_data(sub[i]);
+    }
+    free(sub);
+
+    // flip sign of last item if matrix is 2x2
+    if (adj.rows == 2 && adj.cols == 2) adj.data[1][1] *= -1;
+
+    return transpose(adj);
+}
+
+matrix transpose(matrix m) {
+    matrix t;
+    t.rows = m.rows != m.cols ? m.cols : m.rows;
+    t.cols = m.rows != m.cols ? m.rows : m.cols;
+    t.data = set_data(t.rows, t.cols);
+
+    for (int i = 0; i < t.rows; i++) {
+        for (int j = 0; j < t.cols; j++) {
+            t.data[j][i] = m.data[i][j];
+        }
+    }
+    free_data(m);
+
+    return t;
+}
+
+matrix inverse(matrix m) {
+    double det = determinant(m);
+    if (det == 0) USAGE("non invertable, determinant is zero");
+
+    matrix inv = adjugate(m);
+    for (int i = 0; i < inv.rows; i++) {
+        for (int j = 0; j < inv.cols; j++) {
+            inv.data[i][j] *= (1 / det);
+        }
+    }
+
+    return inv;
+}
+
+
+void display_matrix(matrix m, char *format) {
+    printf("%s =\n", format);
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            printf("%12.3g", m.data[i][j]);
+        }
+        puts("");
+    }
 }

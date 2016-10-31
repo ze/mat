@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct matrix {
     int rows, cols;
@@ -14,5 +15,7 @@ typedef struct matrix {
     exit(1); \
     } while (0);
 
-double determinant(matrix m);
+matrix inverse(matrix m);
+void display_matrix(matrix m, char *format);
+double **set_data(int rows, int cols);
 void free_data(matrix m);
