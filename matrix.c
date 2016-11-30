@@ -1,9 +1,5 @@
 #include "matrix.h"
 
-double determinant(matrix m);
-matrix adjugate(matrix m);
-matrix transpose(matrix m);
-
 double **set_data(int rows, int cols) {
     double **data = malloc(sizeof(double *) * rows);
     for (int i = 0; i < rows; i++) {
@@ -11,6 +7,15 @@ double **set_data(int rows, int cols) {
     }
     
     return data;
+}
+
+matrix new_matrix(int rows, int cols) {
+    matrix new;
+    new.rows = rows;
+    new.cols = cols;
+    new.data = set_data(rows, cols);
+
+    return new;
 }
 
 void free_data(matrix m) {
@@ -56,6 +61,22 @@ double determinant(matrix m) {
     return det;
 }
 
+matrix transpose(matrix m) {
+    matrix t;
+    t.rows = m.rows != m.cols ? m.cols : m.rows;
+    t.cols = m.rows != m.cols ? m.rows : m.cols;
+    t.data = set_data(t.rows, t.cols);
+
+    for (int i = 0; i < t.rows; i++) {
+        for (int j = 0; j < t.cols; j++) {
+            t.data[j][i] = m.data[i][j];
+        }
+    }
+    free_data(m);
+
+    return t;
+}
+
 matrix adjugate(matrix m) {
     matrix *sub = malloc(sizeof(matrix) * m.rows * m.cols);
     for (int i = 0; i < m.rows * m.cols; i++) {
@@ -83,7 +104,8 @@ matrix adjugate(matrix m) {
         }
     }
 
-    matrix adj = {m.rows, m.cols, set_data(m.rows, m.cols)};
+    matrix adj = new_matrix(m.rows, m.cols);
+
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
             adj.data[i][j] = sign * determinant(sub[i * m.rows + j]);
@@ -100,22 +122,6 @@ matrix adjugate(matrix m) {
     if (adj.rows == 2 && adj.cols == 2) adj.data[1][1] *= -1;
 
     return transpose(adj);
-}
-
-matrix transpose(matrix m) {
-    matrix t;
-    t.rows = m.rows != m.cols ? m.cols : m.rows;
-    t.cols = m.rows != m.cols ? m.rows : m.cols;
-    t.data = set_data(t.rows, t.cols);
-
-    for (int i = 0; i < t.rows; i++) {
-        for (int j = 0; j < t.cols; j++) {
-            t.data[j][i] = m.data[i][j];
-        }
-    }
-    free_data(m);
-
-    return t;
 }
 
 matrix inverse(matrix m) {

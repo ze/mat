@@ -1,15 +1,31 @@
 #include "matrix.h"
 
-matrix operation(matrix m, matrix n, matrix (*op)(matrix, matrix)) {
-    return op(m, n);
+double add(double x, double y) {
+    return x + y;
+}
+
+double sub(double x, double y) {
+    return x - y;
+}
+
+matrix operation(matrix m, matrix n, double (*op)(double, double)) {
+    if (m.rows != n.rows && m.cols != n.cols) USAGE("matrices not same size");
+    
+    matrix modified = new_matrix(m.rows, m.cols);
+
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            modified.data[i][j] = op(m.data[i][j], n.data[i][j]);
+        }
+    } 
+    
+    return modified;
 }
 
 matrix mult(matrix m, matrix n) {
     if (m.cols != n.rows) USAGE("matrices not multipliable");
-    matrix prod;
-    prod.rows = m.rows;
-    prod.cols = n.cols;
-    prod.data = set_data(prod.rows, prod.cols);
+
+    matrix prod = new_matrix(m.rows, n.cols);
 
     for (int i = 0; i < prod.rows; i++) {
         for (int j = 0; j < prod.cols; j++) {
@@ -20,36 +36,4 @@ matrix mult(matrix m, matrix n) {
     }
 
     return prod;
-}
-
-matrix add(matrix m, matrix n) {
-    if (m.rows != n.rows && m.cols != n.cols) USAGE("matrices not same size");
-    matrix sum;
-    sum.rows = m.rows;
-    sum.cols = m.cols;
-    sum.data = set_data(m.rows, m.cols);
-    
-    for (int i = 0; i < sum.rows; i++) {
-        for (int j = 0; j < sum.cols; j++) {
-            sum.data[i][j] = m.data[i][j] + n.data[i][j];
-        }
-    }
-
-    return sum;
-}
-
-matrix sub(matrix m, matrix n) {
-    if (m.rows != n.rows && m.cols != n.cols) USAGE("matrices not same size");
-    matrix sub;
-    sub.rows = m.rows;
-    sub.cols = m.cols;
-    sub.data = set_data(m.rows, m.cols);
-    
-    for (int i = 0; i < sub.rows; i++) {
-        for (int j = 0; j < sub.cols; j++) {
-            sub.data[i][j] = m.data[i][j] - n.data[i][j];
-        }
-    }
-
-    return sub;
 }
