@@ -1,10 +1,18 @@
 #include "matrix.h"
 
-double add(double x, double y) {
+double multiply(double x, double y) {
+    return x * y;
+}
+
+double divide(double x, double y) {
+    return x / y;
+}
+
+double addition(double x, double y) {
     return x + y;
 }
 
-double sub(double x, double y) {
+double subtraction(double x, double y) {
     return x - y;
 }
 
@@ -19,6 +27,18 @@ matrix operation(matrix m, matrix n, double (*op)(double, double)) {
         }
     } 
     
+    return modified;
+}
+
+matrix const_operation(int num, matrix m, double (*op)(double, double)) {
+    matrix modified = new_matrix(m.rows, m.cols); 
+
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            modified.data[i][j] = op(m.data[i][j], num);
+        }
+    }
+
     return modified;
 }
 

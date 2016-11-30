@@ -26,6 +26,30 @@ void free_data(matrix m) {
     free(m.data);
 }
 
+matrix const_matrix(int rows, int cols, int num) {
+    matrix ones = new_matrix(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            ones.data[i][j] = num;
+        }
+    }
+
+    return ones;
+}
+
+matrix rand_matrix(int rows, int cols, int bounds) {
+    matrix random = new_matrix(rows, cols);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            random.data[i][j] = rand() % bounds;
+        }
+    }
+
+    return random;
+}
+
 double determinant(matrix m) {
     if (m.rows != m.cols) USAGE("input not NxN"); 
     if (m.rows == 1 && m.cols == 1) return m.data[0][0];
@@ -84,7 +108,6 @@ matrix adjugate(matrix m) {
         sub[i].cols = m.cols - 1;
         sub[i].data = set_data(sub->rows, sub->cols);
     }
-    int sign = 1;
 
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
@@ -105,6 +128,7 @@ matrix adjugate(matrix m) {
     }
 
     matrix adj = new_matrix(m.rows, m.cols);
+    int sign = 1;
 
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
@@ -137,7 +161,6 @@ matrix inverse(matrix m) {
 
     return inv;
 }
-
 
 void display_matrix(matrix m, char *format) {
     printf("%s =\n", format);
