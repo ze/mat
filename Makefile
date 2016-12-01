@@ -1,10 +1,14 @@
 CC=gcc
 CFLAGS=-Wall 
 
-SRC = main.c matrix.c operations.c
+INCLUDES=-Iinclude/
 
-all: $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o matrix
+MAIN=src/main.c
+SRC=$(filter-out $(MAIN), $(wildcard src/*.c))
+
+all: $(SRC) $(MAIN)
+	@mkdir -p bin
+	$(CC) $(CFLAGS) $(INCLUDES) $(MAIN) $(SRC) -o bin/matrix
 
 clean:
-	@rm matrix
+	@rm bin/matrix

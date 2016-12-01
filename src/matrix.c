@@ -27,15 +27,15 @@ void free_data(matrix m) {
 }
 
 matrix const_matrix(int rows, int cols, int num) {
-    matrix ones = new_matrix(rows, cols);
+    matrix constants = new_matrix(rows, cols);
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            ones.data[i][j] = num;
+            constants.data[i][j] = num;
         }
     }
 
-    return ones;
+    return constants;
 }
 
 matrix rand_matrix(int rows, int cols, int bounds) {
