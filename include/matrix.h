@@ -25,7 +25,10 @@ matrix const_matrix(int rows, int cols, int num);
 void display_matrix(matrix m, char *format);
 
 // matrix properties
+double determinant(matrix m);
+matrix transpose(matrix m);
 matrix inverse(matrix m);
+matrix identity(int n);
 
 // matrix operations
 double multiply(double x, double y);
@@ -34,4 +37,4 @@ double add(double x, double y);
 double sub(double x, double y);
 matrix mult(matrix m, matrix n);
 matrix operation(matrix m, matrix n, double (*op)(double, double));
-matrix const_operation(int num, matrix m, double (*op)(double, double));
+void const_operation(int num, matrix m, double (*op)(double, double));

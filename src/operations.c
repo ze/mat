@@ -18,28 +18,24 @@ double subtraction(double x, double y) {
 
 matrix operation(matrix m, matrix n, double (*op)(double, double)) {
     if (m.rows != n.rows && m.cols != n.cols) USAGE("matrices not same size");
-    
+
     matrix modified = new_matrix(m.rows, m.cols);
 
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
             modified.data[i][j] = op(m.data[i][j], n.data[i][j]);
         }
-    } 
-    
-    return modified;
-}
-
-matrix const_operation(int num, matrix m, double (*op)(double, double)) {
-    matrix modified = new_matrix(m.rows, m.cols); 
-
-    for (int i = 0; i < m.rows; i++) {
-        for (int j = 0; j < m.cols; j++) {
-            modified.data[i][j] = op(m.data[i][j], num);
-        }
     }
 
     return modified;
+}
+
+void const_operation(int num, matrix m, double (*op)(double, double)) {
+    for (int i = 0; i < m.rows; i++) {
+        for (int j = 0; j < m.cols; j++) {
+            m.data[i][j] = op(m.data[i][j], num);
+        }
+    }
 }
 
 matrix mult(matrix m, matrix n) {

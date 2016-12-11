@@ -5,7 +5,7 @@ double **set_data(int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         *(data + i) = malloc(sizeof(double) * cols);
     }
-    
+
     return data;
 }
 
@@ -24,6 +24,15 @@ void free_data(matrix m) {
     }
 
     free(m.data);
+}
+
+matrix identity(int n) {
+    matrix id = new_matrix(n, n);
+    for (int i = 0; i < n; i++) {
+        id.data[i][i] = 1;
+    }
+
+    return id;
 }
 
 matrix const_matrix(int rows, int cols, int num) {
@@ -50,24 +59,20 @@ matrix rand_matrix(int rows, int cols, int bounds) {
     return random;
 }
 
-double determinant(matrix m) {
-    if (m.rows != m.cols) USAGE("input not NxN"); 
+double det_recursive(matrix m, int sign) {
+    if (m.rows != m.cols) USAGE("input not NxN");
     if (m.rows == 1 && m.cols == 1) return m.data[0][0];
     if (m.rows == 2 && m.cols == 2) {
        return (m.data[0][0] * m.data[1][1]) - (m.data[0][1] * m.data[1][0]);
     }
 
-    double det = 0;
-    static int sign = 1;
-    
     // creation of submatrix
-    matrix sub;
-    sub.rows = sub.cols = m.rows - 1;
-    sub.data = set_data(sub.rows, sub.cols);
+    matrix sub = new_matrix(m.rows - 1, m.rows - 1);
 
-    /* 
-     * construct new array from m.data.
-     * exclude current row and column and fill leftovers.
+    double det = 0;
+    /**
+     *  construct new array from m.data.
+     *  exclude current row and column and fill leftovers.
      */
     for (int i = 0; i < m.rows; i++) {
         for (int j = 1; j < m.rows; j++) {
@@ -77,7 +82,7 @@ double determinant(matrix m) {
                 l++;
             }
         }
-        det += sign * m.data[0][i] * determinant(sub);
+        det += sign * m.data[0][i] * det_recursive(sub, sign);
         sign *= -1;
     }
 
@@ -85,18 +90,20 @@ double determinant(matrix m) {
     return det;
 }
 
+double determinant(matrix m) {
+    return det_recursive(m, 1);
+}
+
 matrix transpose(matrix m) {
-    matrix t;
-    t.rows = m.rows != m.cols ? m.cols : m.rows;
-    t.cols = m.rows != m.cols ? m.rows : m.cols;
-    t.data = set_data(t.rows, t.cols);
+    int rows = m.rows != m.cols ? m.cols : m.rows;
+    int cols = m.rows != m.cols ? m.rows : m.cols;
+    matrix t = new_matrix(rows, cols);
 
     for (int i = 0; i < t.rows; i++) {
         for (int j = 0; j < t.cols; j++) {
-            t.data[j][i] = m.data[i][j];
+            t.data[i][j] = m.data[j][i];
         }
     }
-    free_data(m);
 
     return t;
 }
@@ -104,9 +111,7 @@ matrix transpose(matrix m) {
 matrix adjugate(matrix m) {
     matrix *sub = malloc(sizeof(matrix) * m.rows * m.cols);
     for (int i = 0; i < m.rows * m.cols; i++) {
-        sub[i].rows = m.rows - 1;
-        sub[i].cols = m.cols - 1;
-        sub[i].data = set_data(sub->rows, sub->cols);
+        sub[i] = new_matrix(m.rows - 1, m.cols - 1);
     }
 
     for (int i = 0; i < m.rows; i++) {
@@ -136,14 +141,11 @@ matrix adjugate(matrix m) {
             sign *= -1;
         }
     }
-    
+
     for (int i = 0; i < m.rows * m.cols; i++) {
         free_data(sub[i]);
     }
     free(sub);
-
-    // flip sign of last item if matrix is 2x2
-    if (adj.rows == 2 && adj.cols == 2) adj.data[1][1] *= -1;
 
     return transpose(adj);
 }
@@ -153,10 +155,11 @@ matrix inverse(matrix m) {
     if (det == 0) USAGE("non invertable, determinant is zero");
 
     matrix inv = adjugate(m);
-    for (int i = 0; i < inv.rows; i++) {
-        for (int j = 0; j < inv.cols; j++) {
-            inv.data[i][j] *= (1 / det);
-        }
+    const_operation(det, inv, divide);
+
+    if (inv.rows == 2 && inv.cols == 2) {
+        inv.data[0][1] *= -1;
+        inv.data[1][1] *= -1;
     }
 
     return inv;
@@ -166,7 +169,7 @@ void display_matrix(matrix m, char *format) {
     printf("%s =\n", format);
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
-            printf("%12.3g", m.data[i][j]);
+            printf("%12.3G", m.data[i][j]);
         }
         puts("");
     }
