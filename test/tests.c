@@ -69,15 +69,9 @@ void inverse_test() {
 
 
 int main() {
-    puts("Beginning tests\n");
     determinant_test();
-    puts("Determinant tests passed\n");
-
     transpose_test();
-    puts("Transpose tests passed\n");
-
     inverse_test();
-    puts("Inverse tests passed\n");
 
     puts("All tests passed");
     return 0;

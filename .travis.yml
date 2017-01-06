@@ -1,0 +1,11 @@
+language: c
+
+notifications:
+    email: false
+
+compiler: gcc
+
+install: true
+
+before_script: make && make test
+script: cd bin && ./test
