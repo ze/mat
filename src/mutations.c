@@ -1,4 +1,42 @@
+#include <string.h>
+
 #include "matrix.h"
+
+double **set_data(int rows, int cols) {
+    double **data = malloc(sizeof(double *) * rows);
+    for (int i = 0; i < rows; i++) {
+        *(data + i) = malloc(sizeof(double) * cols);
+    }
+
+    return data;
+}
+
+matrix copy(matrix *m) {
+    matrix n = new_matrix(m->rows, m->cols);
+
+    for (int i = 0; i < n.rows; i++) {
+        memcpy(n.data[i], m->data[i], sizeof(double) * n.cols);
+    }
+
+    return n;
+}
+
+matrix new_matrix(int rows, int cols) {
+    matrix new;
+    new.rows = rows;
+    new.cols = cols;
+    new.data = set_data(rows, cols);
+
+    return new;
+}
+
+void free_data(matrix m) {
+    for (int i = 0; i < m.rows; i ++) {
+        free(*(m.data + i));
+    }
+
+    free(m.data);
+}
 
 void clear(matrix m) {
     for (int i = 0; i < m.rows; i++) {

@@ -1,5 +1,11 @@
 #include "matrix.h"
 
+void swap_rows(matrix m, int i, int j) {
+    double *temp = m.data[i];
+    m.data[i] = m.data[j];
+    m.data[j] = temp;
+}
+
 double multiply(double x, double y) {
     return x * y;
 }
@@ -30,11 +36,23 @@ matrix operation(matrix m, matrix n, double (*op)(double, double)) {
     return modified;
 }
 
-void const_operation(int num, matrix m, double (*op)(double, double)) {
+void const_operation(double num, matrix m, double (*op)(double, double)) {
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
             m.data[i][j] = op(m.data[i][j], num);
         }
+    }
+}
+
+void row_operation(matrix m, int row, int apply, double (*op)(double, double)) {
+    for (int i = 0; i < m.cols; i++) {
+        m.data[apply][i] = op(m.data[apply][i], m.data[row][i]);
+    }
+}
+
+void const_row_operation(matrix m, int row, double num, double (*op)(double, double)) {
+    for (int i = 0; i < m.cols; i++) {
+        m.data[row][i] = op(m.data[row][i], num);
     }
 }
 

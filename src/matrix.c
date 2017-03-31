@@ -1,35 +1,13 @@
 #include "matrix.h"
+#include "mutate.h"
 
-double **set_data(int rows, int cols) {
-    double **data = malloc(sizeof(double *) * rows);
-    for (int i = 0; i < rows; i++) {
-        *(data + i) = malloc(sizeof(double) * cols);
-    }
-
-    return data;
-}
-
-matrix new_matrix(int rows, int cols) {
-    matrix new;
-    new.rows = rows;
-    new.cols = cols;
-    new.data = set_data(rows, cols);
-
-    return new;
-}
-
-void free_data(matrix m) {
-    for (int i = 0; i < m.rows; i ++) {
-        free(*(m.data + i));
-    }
-
-    free(m.data);
-}
-
-matrix identity(int n) {
+matrix eye(int n) {
     matrix id = new_matrix(n, n);
+
     for (int i = 0; i < n; i++) {
-        id.data[i][i] = 1;
+        for (int j = 0; j < n; j++) {
+            id.data[i][j] = i == j ? 1 : 0;
+        }
     }
 
     return id;
@@ -59,39 +37,42 @@ matrix rand_matrix(int rows, int cols, int bounds) {
     return random;
 }
 
-double det_recursive(matrix m, int sign) {
-    if (m.rows != m.cols) USAGE("input not NxN");
-    if (m.rows == 1 && m.cols == 1) return m.data[0][0];
-    if (m.rows == 2 && m.cols == 2) {
-       return (m.data[0][0] * m.data[1][1]) - (m.data[0][1] * m.data[1][0]);
-    }
-
-    // creation of submatrix
-    matrix sub = new_matrix(m.rows - 1, m.rows - 1);
-
-    double det = 0;
-    /**
-     *  construct new array from m.data.
-     *  exclude current row and column and fill leftovers.
-     */
+void upper_tri(matrix m) {
     for (int i = 0; i < m.rows; i++) {
-        for (int j = 1; j < m.rows; j++) {
-            for (int k = 0, l = 0; k < m.rows; k++) {
-                if (k == i) continue;
-                sub.data[j - 1][l] = m.data[j][k];
-                l++;
-            }
-        }
-        det += sign * m.data[0][i] * det_recursive(sub, sign);
-        sign *= -1;
-    }
+        for (int j = i + 1; j < m.cols; j++) {
+            double ratio = m.data[j][i] / m.data[i][i];
 
-    free_data(sub);
-    return det;
+            const_row_operation(m, i, ratio, multiply);
+            row_operation(m, i, j, subtraction);
+            const_row_operation(m, i, ratio, divide);
+        }
+    }
+}
+
+void lower_tri(matrix m) {
+    for (int i = m.rows - 1; i > 0; i--) {
+        for (int j = i - 1; j > -1; j--) {
+            double ratio = m.data[j][i] / m.data[i][i];
+
+            const_row_operation(m, i, ratio, multiply);
+            row_operation(m, i, j, subtraction);
+            const_row_operation(m, i, ratio, divide);
+        }
+    }
 }
 
 double determinant(matrix m) {
-    return det_recursive(m, 1);
+    double det = 1;
+
+    matrix n = copy(&m);
+    upper_tri(n);
+
+    for (int i = 0; i < n.rows && i < n.cols; i++) {
+        det *= n.data[i][i];
+    }
+
+    free_data(n);
+    return det;
 }
 
 matrix transpose(matrix m) {
@@ -108,6 +89,51 @@ matrix transpose(matrix m) {
     return t;
 }
 
+matrix inverse(matrix m) {
+    matrix inv = eye(m.rows);
+    matrix n = copy(&m);
+
+    for (int i = 0; i < n.rows; i++) {
+        double pivot = n.data[i][i];
+        const_row_operation(n, i, pivot, divide);
+        const_row_operation(inv, i, pivot, divide);
+
+        for (int j = i + 1; j < n.cols; j++) {
+            double ratio = n.data[j][i] / n.data[i][i];
+
+            const_row_operation(n, i, ratio, multiply);
+            row_operation(n, i, j, subtraction);
+            const_row_operation(n, i, ratio, divide);
+
+            const_row_operation(inv, i, ratio, multiply);
+            row_operation(inv, i, j, subtraction);
+            const_row_operation(inv, i, ratio, divide);
+        }
+    }
+
+    for (int i = n.rows - 1; i > 0; i--) {
+        double pivot = n.data[i][i];
+        const_row_operation(n, i, pivot, divide);
+        const_row_operation(inv, i, pivot, divide);
+
+        for (int j = i - 1; j > -1; j--) {
+            double ratio = n.data[j][i] / n.data[i][i];
+
+            const_row_operation(n, i, ratio, multiply);
+            row_operation(n, i, j, subtraction);
+            const_row_operation(n, i, ratio, divide);
+
+            const_row_operation(inv, i, ratio, multiply);
+            row_operation(inv, i, j, subtraction);
+            const_row_operation(inv, i, ratio, divide);
+        }
+    }
+
+    free_data(n);
+    return inv;
+}
+
+/*
 matrix adjugate(matrix m) {
     matrix *sub = malloc(sizeof(matrix) * m.rows * m.cols);
     for (int i = 0; i < m.rows * m.cols; i++) {
@@ -149,28 +175,14 @@ matrix adjugate(matrix m) {
 
     return transpose(adj);
 }
+*/
 
-matrix inverse(matrix m) {
-    double det = determinant(m);
-    if (det == 0) USAGE("non invertable, determinant is zero");
-
-    matrix inv = adjugate(m);
-    const_operation(det, inv, divide);
-
-    if (inv.rows == 2 && inv.cols == 2) {
-        inv.data[0][1] *= -1;
-        inv.data[1][1] *= -1;
-    }
-
-    return inv;
-}
-
-void display_matrix(matrix m, char *format) {
+void display_matrix(char *format, matrix m) {
     printf("%s =\n", format);
     for (int i = 0; i < m.rows; i++) {
         for (int j = 0; j < m.cols; j++) {
             printf("%12.3G", m.data[i][j]);
         }
-        puts("");
+        printf("\n");
     }
 }
