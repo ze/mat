@@ -2,7 +2,7 @@
 
 #include "matrix.h"
 
-double **set_data(int rows, int cols) {
+double **set_data(size_t rows, size_t cols) {
     double **data = malloc(sizeof(double *) * rows);
     for (int i = 0; i < rows; i++) {
         *(data + i) = malloc(sizeof(double) * cols);
@@ -21,7 +21,7 @@ matrix copy(matrix *m) {
     return n;
 }
 
-matrix new_matrix(int rows, int cols) {
+matrix new_matrix(size_t rows, size_t cols) {
     matrix new;
     new.rows = rows;
     new.cols = cols;
@@ -54,7 +54,7 @@ void replace(matrix m, double old, double rep) {
     }
 }
 
-void resize(matrix m, int rows, int cols) {
+void resize(matrix m, size_t rows, size_t cols) {
     m.data = realloc(m.data, sizeof(double *) * rows);
 
     for (int i = 0; i < rows; i++) {

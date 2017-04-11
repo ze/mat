@@ -1,4 +1,4 @@
-#include "input.h"
+#include "matrix_input.h"
 
 void input_check(char *in) {
     if (!strpbrk(in, "[]") || *in != '[') USAGE("invalid input");

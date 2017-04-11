@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 typedef struct matrix {
-    int rows, cols;
+    size_t rows, cols;
     double **data;
 } matrix;
 
@@ -15,11 +15,11 @@ typedef struct matrix {
     } while (0);
 
 // matrix creation and deletion
-double **set_data(int rows, int cols);
-matrix new_matrix(int rows, int cols);
+double **set_data(size_t rows, size_t cols);
+matrix new_matrix(size_t rows, size_t cols);
 void free_data(matrix m);
-matrix rand_matrix(int rows, int cols, int bounds);
-matrix const_matrix(int rows, int cols, int num);
+matrix rand_matrix(size_t rows, size_t cols, int bounds);
+matrix const_matrix(size_t rows, size_t cols, int num);
 
 // matrix displaying
 void display_matrix(char *format, matrix m);
@@ -30,7 +30,7 @@ void lower_tri(matrix m);
 double determinant(matrix m);
 matrix transpose(matrix m);
 matrix inverse(matrix m);
-matrix eye(int n);
+matrix eye(size_t n);
 
 // matrix operations
 void swap_rows(matrix m, int i, int j);

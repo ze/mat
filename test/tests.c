@@ -1,6 +1,4 @@
-#include <assert.h>
-
-#include "input.h"
+#include "tests.h"
 
 const int TEST_TOTAL = 9;
 
@@ -77,10 +75,15 @@ void inverse_test() {
     }
 }
 
-int main() {
+void matrix_test() {
     determinant_test();
     inverse_test();
     transpose_test();
+}
+
+int main() {
+    matrix_test();
+    vector_test();
 
     printf("All tests passed\n");
     return 0;

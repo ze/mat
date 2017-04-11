@@ -1,4 +1,4 @@
-#include "input.h"
+#include "matrix_input.h"
 
 int main(int argc, char **argv) {
 

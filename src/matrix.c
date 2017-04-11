@@ -1,7 +1,7 @@
 #include "matrix.h"
 #include "mutate.h"
 
-matrix eye(int n) {
+matrix eye(size_t n) {
     matrix id = new_matrix(n, n);
 
     for (int i = 0; i < n; i++) {
@@ -13,7 +13,7 @@ matrix eye(int n) {
     return id;
 }
 
-matrix const_matrix(int rows, int cols, int num) {
+matrix const_matrix(size_t rows, size_t cols, int num) {
     matrix constants = new_matrix(rows, cols);
 
     for (int i = 0; i < rows; i++) {
@@ -25,7 +25,7 @@ matrix const_matrix(int rows, int cols, int num) {
     return constants;
 }
 
-matrix rand_matrix(int rows, int cols, int bounds) {
+matrix rand_matrix(size_t rows, size_t cols, int bounds) {
     matrix random = new_matrix(rows, cols);
 
     for (int i = 0; i < rows; i++) {
@@ -132,50 +132,6 @@ matrix inverse(matrix m) {
     free_data(n);
     return inv;
 }
-
-/*
-matrix adjugate(matrix m) {
-    matrix *sub = malloc(sizeof(matrix) * m.rows * m.cols);
-    for (int i = 0; i < m.rows * m.cols; i++) {
-        sub[i] = new_matrix(m.rows - 1, m.cols - 1);
-    }
-
-    for (int i = 0; i < m.rows; i++) {
-        for (int j = 0; j < m.cols; j++) {
-            for (int k = 0, x = 0; k < m.rows; k++) {
-                if (k == i) {
-                    x++;
-                    continue;
-                }
-                for (int l = 0, y = 0; l < m.cols; l++) {
-                    if (l == j)  {
-                        y++;
-                        continue;
-                    }
-                    sub[i * m.rows + j].data[k - x][l - y] = m.data[k][l];
-                }
-            }
-        }
-    }
-
-    matrix adj = new_matrix(m.rows, m.cols);
-    int sign = 1;
-
-    for (int i = 0; i < m.rows; i++) {
-        for (int j = 0; j < m.cols; j++) {
-            adj.data[i][j] = sign * determinant(sub[i * m.rows + j]);
-            sign *= -1;
-        }
-    }
-
-    for (int i = 0; i < m.rows * m.cols; i++) {
-        free_data(sub[i]);
-    }
-    free(sub);
-
-    return transpose(adj);
-}
-*/
 
 void display_matrix(char *format, matrix m) {
     printf("%s =\n", format);

@@ -1,11 +1,11 @@
 CC=gcc
-CFLAGS=-std=c99 -Wall 
+CFLAGS=-std=c99 -Wall
 
 INCLUDES=-Iinclude/
 
 MAIN=src/main.c
 SRC=$(filter-out $(MAIN), $(wildcard src/*.c))
-TESTS=test/tests.c
+TESTS=$(wildcard test/*.c)
 
 all: $(SRC) $(MAIN)
 	@mkdir -p bin
@@ -17,5 +17,5 @@ test: $(SRC) $(TESTS)
 
 clean:
 	@rm bin/matrix
-	
+
 .PHONY: test
