@@ -68,7 +68,6 @@ double determinant(matrix m) {
 
     matrix n = copy(&m);
     upper_tri(n);
-    display_matrix("upper", n);
 
     for (int i = 0; i < n.rows && i < n.cols; i++) {
         det *= isnormal(n.data[i][i]) ? n.data[i][i] : 0;
