@@ -1,3 +1,6 @@
+#include <ctype.h>
+#include <string.h>
+
 #include "matrix_input.h"
 
 void input_check(char *in) {

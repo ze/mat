@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "matrix.h"
 #include "mutate.h"
 
@@ -66,9 +68,10 @@ double determinant(matrix m) {
 
     matrix n = copy(&m);
     upper_tri(n);
+    display_matrix("upper", n);
 
     for (int i = 0; i < n.rows && i < n.cols; i++) {
-        det *= n.data[i][i];
+        det *= isnormal(n.data[i][i]) ? n.data[i][i] : 0;
     }
 
     free_data(n);

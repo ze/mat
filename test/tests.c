@@ -1,6 +1,7 @@
 #include "tests.h"
+#include "matrix.h"
 
-const int TEST_TOTAL = 9;
+const int TEST_TOTAL = 11;
 
 char test_mats[][37] = {
     "[1,2,3][4,5,6][7,8,9]",
@@ -8,6 +9,7 @@ char test_mats[][37] = {
     "[3.5,11.2][34.2,48.8]",
     "[9,8,1][6,8,4][3,2,3]",
     "[3,4,5,6][5,4,2,1][4,7,9,1][9,3,2,6]",
+    "[1,2,3][1,2,3][1,2,3]",
     "[1,2,3.5,5][6,7,8,10]",
     "[1,2][3,4][5,16][7,8]",
     "[5,2,3,4,1,6,7]",
@@ -15,7 +17,7 @@ char test_mats[][37] = {
     "[911][4000][3][12]"
 };
 
-int dets[] = {0, 118, -212, 84, -607}; // rest are indeterminable matrices
+int dets[] = {0, 118, -212, 84, -607, 0}; // rest are indeterminable matrices
 
 char test_inv[][42] = {
     "[470,-176,-42][-294,235,8][-176,-58,176]",
@@ -24,7 +26,7 @@ char test_inv[][42] = {
 };
 
 void determinant_test() {
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         matrix m = parse_data(test_mats[i]);
         int det = determinant(m);
         display_matrix("matrix", m);
@@ -39,6 +41,7 @@ void transpose_test() {
     for (int i = 0; i < TEST_TOTAL; i++) {
         matrix m = parse_data(test_mats[i]);
         matrix t = transpose(m);
+        display_matrix("transpose", t);
 
         for (int j = 0; j < m.rows; j++) {
             for (int k = 0; k < m.cols; k++) {
